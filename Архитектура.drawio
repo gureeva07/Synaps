@@ -1,0 +1,100 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.2.8 Chrome/140.0.7339.240 Electron/38.4.0 Safari/537.36" version="28.2.8">
+  <diagram name="Страница — 1" id="cgNwsQTmNdl3S_ykFfbE">
+    <mxGraphModel dx="1678" dy="989" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="QLDob0l4h-0j8zJ9EOVy-3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="QLDob0l4h-0j8zJ9EOVy-1" target="c77Qn4wYmHCB3Xaguu9w-4" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="410" y="274" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QLDob0l4h-0j8zJ9EOVy-4" value="Корреспонденция" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="QLDob0l4h-0j8zJ9EOVy-3" vertex="1" connectable="0">
+          <mxGeometry x="-0.1879" y="-2" relative="1" as="geometry">
+            <mxPoint x="7" y="-18" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QLDob0l4h-0j8zJ9EOVy-1" value="FastAPI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+          <mxGeometry x="180" y="290" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="QLDob0l4h-0j8zJ9EOVy-15" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="c77Qn4wYmHCB3Xaguu9w-4" target="c77Qn4wYmHCB3Xaguu9w-12" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="530" y="274" as="sourcePoint" />
+            <mxPoint x="1000" y="320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QLDob0l4h-0j8zJ9EOVy-16" value="Эмбеддинг" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="QLDob0l4h-0j8zJ9EOVy-15" vertex="1" connectable="0">
+          <mxGeometry x="-0.1823" y="1" relative="1" as="geometry">
+            <mxPoint x="12" y="-13" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QLDob0l4h-0j8zJ9EOVy-12" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=classic;startFill=1;" parent="1" source="QLDob0l4h-0j8zJ9EOVy-6" target="QLDob0l4h-0j8zJ9EOVy-1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="QLDob0l4h-0j8zJ9EOVy-13" value="Post/Get" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="QLDob0l4h-0j8zJ9EOVy-12" vertex="1" connectable="0">
+          <mxGeometry x="-0.1285" y="-1" relative="1" as="geometry">
+            <mxPoint x="5" y="-15" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QLDob0l4h-0j8zJ9EOVy-6" value="" style="verticalLabelPosition=bottom;aspect=fixed;html=1;shape=mxgraph.salesforce.web;fillColorStyles=fillColor2,fillColor3,fillColor4;fillColor2=#032d60;fillColor3=#0d9dda;fillColor4=#ffffff;fillColor=none;strokeColor=none;" parent="1" vertex="1">
+          <mxGeometry x="50" y="296.3" width="60" height="47.400000000000006" as="geometry" />
+        </mxCell>
+        <mxCell id="QLDob0l4h-0j8zJ9EOVy-19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" parent="1" source="c77Qn4wYmHCB3Xaguu9w-12" target="QLDob0l4h-0j8zJ9EOVy-1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1050" y="150" />
+              <mxPoint x="240" y="150" />
+            </Array>
+            <mxPoint x="1060" y="290" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QLDob0l4h-0j8zJ9EOVy-20" value="Сгенерированный ответ" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="QLDob0l4h-0j8zJ9EOVy-19" vertex="1" connectable="0">
+          <mxGeometry x="0.1158" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QLDob0l4h-0j8zJ9EOVy-18" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" source="QLDob0l4h-0j8zJ9EOVy-17" target="c77Qn4wYmHCB3Xaguu9w-12" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1060" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QLDob0l4h-0j8zJ9EOVy-17" value="БД корренспонденции" style="shape=datastore;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="995" y="500" width="110" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="c77Qn4wYmHCB3Xaguu9w-4" value="LangchainService" style="swimlane;" vertex="1" parent="1">
+          <mxGeometry x="400" y="220" width="460" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="c77Qn4wYmHCB3Xaguu9w-5" value="Определение типа корренспонденции" style="whiteSpace=wrap;html=1;" vertex="1" parent="c77Qn4wYmHCB3Xaguu9w-4">
+          <mxGeometry x="20" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="c77Qn4wYmHCB3Xaguu9w-6" value="Определение сроков&amp;nbsp;" style="whiteSpace=wrap;html=1;" vertex="1" parent="c77Qn4wYmHCB3Xaguu9w-4">
+          <mxGeometry x="20" y="110" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="c77Qn4wYmHCB3Xaguu9w-7" value="Выявление нормативных актов" style="whiteSpace=wrap;html=1;" vertex="1" parent="c77Qn4wYmHCB3Xaguu9w-4">
+          <mxGeometry x="150" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="c77Qn4wYmHCB3Xaguu9w-8" value="Выявление контактных данных" style="whiteSpace=wrap;html=1;" vertex="1" parent="c77Qn4wYmHCB3Xaguu9w-4">
+          <mxGeometry x="150" y="110" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="c77Qn4wYmHCB3Xaguu9w-9" value="Формирование краткого содержания" style="whiteSpace=wrap;html=1;" vertex="1" parent="c77Qn4wYmHCB3Xaguu9w-4">
+          <mxGeometry x="283.5" y="40" width="156.5" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="c77Qn4wYmHCB3Xaguu9w-10" value="Формирование эмбеддинга содержания&amp;nbsp;" style="whiteSpace=wrap;html=1;" vertex="1" parent="c77Qn4wYmHCB3Xaguu9w-4">
+          <mxGeometry x="283.5" y="110" width="156.5" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="c77Qn4wYmHCB3Xaguu9w-12" value="RAG Service" style="swimlane;" vertex="1" parent="1">
+          <mxGeometry x="950" y="190" width="200" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="c77Qn4wYmHCB3Xaguu9w-13" value="Поиск похожей по содержанию корреспонденции" style="whiteSpace=wrap;html=1;" vertex="1" parent="c77Qn4wYmHCB3Xaguu9w-12">
+          <mxGeometry x="40" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="c77Qn4wYmHCB3Xaguu9w-14" value="Суммаризация ответоа на похожую корреспонденцию" style="whiteSpace=wrap;html=1;" vertex="1" parent="c77Qn4wYmHCB3Xaguu9w-12">
+          <mxGeometry x="40" y="110" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="c77Qn4wYmHCB3Xaguu9w-16" value="Генерация ответа" style="whiteSpace=wrap;html=1;" vertex="1" parent="c77Qn4wYmHCB3Xaguu9w-12">
+          <mxGeometry x="40" y="180" width="120" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
