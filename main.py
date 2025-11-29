@@ -1,137 +1,88 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-from pydantic import BaseModel
-from typing import List, Optional
-from pathlib import Path
-from query import get_answer
-
-app = FastAPI(title="Email Client API")
-
-# CORS настройки для подключения React фронтенда
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",      # Vite dev server
-        "http://localhost:5173",      # Vite альтернативный порт
-        "http://localhost:8000",      # Production (собранный React на том же сервере)
-        "http://127.0.0.1:8000",      # То же самое, но через 127.0.0.1
-        "http://127.0.0.1:3000",      # Vite dev server через 127.0.0.1
-        "http://127.0.0.1:5173"       # Vite альтернативный порт через 127.0.0.1
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Пути к статическим файлам React
-FRONTEND_DIR = Path(__file__).parent.parent / "frontend" / "dist"
-
-# Модели данных
-class EmailMessage(BaseModel):
-    id: int
-    sender: str
-    sender_email: str
-    subject: str
-    preview: str
-    body: str
-    timestamp: str
-    is_read: bool = False
-    has_attachment: bool = False
-    tags: Optional[List[str]] = []
-
-class SendEmailRequest(BaseModel):
-    to: str
-    subject: str
-    body: str
-    reply_to_id: Optional[int] = None
-
-class AutoReplyRequest(BaseModel):
-    email_id: int
-    original_message: str
-
-class AutoReplyResponse(BaseModel):
-    generated_reply: str
-    confidence: float
+from agents import filtering_agent, summarization_agent, response_agent, human_review_agent
+from langgraph.graph import START , END, StateGraph
+from core.email_imap import fetch_imap_emails
+from core.email_ingestion import fetch_email
+from core.email_sender import send_email,send_draft_to_gmail,extract_name_from_email
+from utils.logger import get_logger
+from config import IMAP_USERNAME, IMAP_PASSWORD, IMAP_SERVER
+from core.supervisor import supervisor_langgraph 
 
 
-@app.get("/api/emails", response_model=List[EmailMessage])
-async def get_emails():
-    """
-    Получить список всех писем
-    TODO: Реализовать получение писем из базы данных
-    """
-    # Заглушка - возвращаем пример данных
-    return []
+logger = get_logger(__name__)
 
-@app.get("/api/emails/{email_id}", response_model=EmailMessage)
-async def get_email(email_id: int):
-    """
-    Получить конкретное письмо по ID
-    TODO: Реализовать получение письма из базы данных
-    """
-    # Заглушка
-    return {}
+# main.py
+from core.email_ingestion import fetch_email
+from core.state import EmailState
+from core.supervisor import supervisor_langgraph
+from core.email_sender import send_email
 
-@app.post("/api/emails/send")
-async def send_email(request: SendEmailRequest):
-    """
-    Отправить письмо
-    TODO: Реализовать отправку письма через SMTP или почтовый сервис
-    """
-    print(request)
-    return {
-        "status": "success",
-        "message": "Email sending not implemented yet",
-        "data": request.dict()
-    }
+# this one lets you chose if you want to draft or not 
 
-@app.post("/api/emails/auto-reply", response_model=AutoReplyResponse)
-async def generate_auto_reply(request: AutoReplyRequest):
-    """
-    Генерировать автоматический ответ на письмо
-    TODO: Реализовать бизнес-логику генерации ответа (AI/ML модель)
-    """
-    print(request)
-
-    return {
-        "generated_reply": get_answer(request.body),
-        "confidence": 1.0
-    }
-
-@app.post("/api/emails/{email_id}/mark-read")
-async def mark_as_read(email_id: int):
-    """
-    Пометить письмо как прочитанное
-    TODO: Реализовать обновление статуса в базе данных
-    """
-    return {"status": "success", "email_id": email_id}
+def process_email_action(email, user_name):
+    action = input("Do you want to (s)end the email or (d)raft it to Gmail? (s/d): ").strip().lower()
+    if action == "s":
+        if send_email(email, user_name):
+            logger.info("Email sent successfully.")
+        else:
+            logger.warning("Failed to send email.")
+    elif action == "d":
+        # Ask for Gmail address only if drafting
+        gmail_address = input("Please enter your Gmail address for drafts: ")
+        if send_draft_to_gmail(email, user_name, gmail_address):
+            logger.info("Draft sent to Gmail successfully.")
+        else:
+            logger.warning("Failed to send draft to Gmail.")
+    else:
+        logger.warning("Invalid option. No action taken.")
 
 
-# Раздача статических файлов React (только если собран frontend)
-if FRONTEND_DIR.exists():
-    # Монтируем статические файлы (JS, CSS, изображения)
-    app.mount("/assets", StaticFiles(directory=FRONTEND_DIR / "assets"), name="assets")
+def main():
+    logger.info("Starting main function.")
+    
+    user_name = extract_name_from_email(IMAP_USERNAME)
+    
+    # Use IMAP to fetch live emails
+    emails = fetch_email()
+    print(f"Fetched {len(emails)} emails from IMAP.")
+    logger.debug(f"Fetched {len(emails)} emails from IMAP.")
+    
+    if not emails:
+        logger.info("No emails found.")
+        return
+    
+    latest_emails = emails[-5:]  # get the last 5 emails from the inbox
+    
 
-    # Главная страница - для всех не-API маршрутов отдаём index.html
-    @app.get("/{full_path:path}")
-    async def serve_react_app(full_path: str):
-        """
-        Раздаёт React приложение для всех не-API маршрутов
-        """
-        # Отдаём index.html для всех маршрутов (включая корневой /)
-        index_file = FRONTEND_DIR / "index.html"
-        if index_file.exists():
-            return FileResponse(index_file)
+    print("\nSelect an email to process:")
+    for idx, email in enumerate(latest_emails):
+        print(f"{idx + 1}. {email['subject']}")
+    
+    choice = int(input("Enter the number of the email you want to choose: ")) - 1
+    if choice < 0 or choice >= len(latest_emails):
+        print("Invalid choice. Exiting.")
+        return
+    
+    selected_email = latest_emails[choice]
+    
+    # Create state and process the email through the workflow
+    state = EmailState()
+    state.emails = [selected_email]
+    state.current_email = selected_email
+    state = supervisor_langgraph(selected_email, state, user_name, recipient_name="samplehello")
+    
+    print("\nGenerated Response:\n")
+    print(selected_email.get("response", "No response generated."))
+    
+    changes = input("Do you want to make changes to the response? (y/n): ").strip().lower()
+    if changes == "y":
+        modified_response = input("Enter the modified response: ")
+        selected_email["response"] = modified_response
+    
+    # Now process the final action (send vs. draft)
+    process_email_action(selected_email, user_name)
+    
+    logger.info("All emails processed.")
+    logger.debug(f"Final State: {state}")
 
-        return {"error": "Frontend not built. Run 'npm run build' in frontend directory."}
-else:
-    # Если frontend не собран, показываем информационное сообщение на главной странице
-    @app.get("/")
-    async def root():
-        return {
-            "message": "Email Client API",
-            "error": "Frontend not built",
-            "instructions": "Run 'npm run build' in frontend directory, then restart the server"
-        }
+if __name__ == "__main__":
+    main()
