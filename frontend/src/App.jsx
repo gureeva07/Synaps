@@ -5,48 +5,33 @@ import EmailViewer from './components/EmailViewer'
 import { emailAPI } from './services/api'
 
 function App() {
-  // Начальные данные для демонстрации интерфейса
-  const initialEmails = [
-    {
-      id: 1,
-      sender: "Алексей Смирнов",
-      senderEmail: "alexey@design.studio",
-      subject: "Обновление дизайн-системы",
-      preview: "Привет! Мы закончили работу над новыми компонентами для дашборда. Прошу посмотреть и дать фидбек до...",
-      body: "Привет,\n\nМы закончили работу над новыми компонентами для дашборда. В этом релизе мы сфокусировались на улучшении производительности и доступности.",
-      timestamp: "10:42",
-      isRead: false,
-      hasAttachment: true,
-      tags: ["Проект X"]
-    },
-    {
-      id: 2,
-      sender: "Команда Stripe",
-      senderEmail: "support@stripe.com",
-      subject: "Ваш ежемесячный отчет",
-      preview: "Сводка по транзакциям за октябрь уже доступна в личном кабинете. Посмотрите детали...",
-      body: "Сводка по транзакциям за октябрь уже доступна в личном кабинете.",
-      timestamp: "Вчера",
-      isRead: true,
-      hasAttachment: false,
-      tags: []
-    },
-    {
-      id: 3,
-      sender: "Мария Иванова",
-      senderEmail: "maria@company.com",
-      subject: "Встреча по проекту",
-      preview: "Подготовила презентацию к завтрашнему созвону. Ссылка внутри.",
-      body: "Подготовила презентацию к завтрашнему созвону. Ссылка внутри.",
-      timestamp: "Пн",
-      isRead: true,
-      hasAttachment: false,
-      tags: []
-    }
-  ]
-
+  // Список отображаемых писем
+  const initialEmails = []
   const [emails, setEmails] = useState(initialEmails)
   const [selectedEmail, setSelectedEmail] = useState(initialEmails[0])
+
+  // Обработчик выбора письма
+  const handleSelectEmail = async (email) => {
+    setSelectedEmail(email)
+
+    // Помечаем письмо как прочитанное
+    if (!email.is_read && !email.isRead) {
+      try {
+        await emailAPI.markAsRead(email.id)
+
+        // Обновляем состояние локально
+        setEmails(prevEmails =>
+          prevEmails.map(e =>
+            e.id === email.id
+              ? { ...e, is_read: true, isRead: true }
+              : e
+          )
+        )
+      } catch (error) {
+        console.error('Ошибка при пометке письма как прочитанного:', error)
+      }
+    }
+  }
 
   // Загрузка писем из API (опционально)
   useEffect(() => {
@@ -103,7 +88,7 @@ function App() {
       <EmailList
         emails={emails}
         selectedEmail={selectedEmail}
-        onSelectEmail={setSelectedEmail}
+        onSelectEmail={handleSelectEmail}
       />
       <EmailViewer
         email={selectedEmail}

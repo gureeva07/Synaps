@@ -66,6 +66,13 @@ class AutoReplyResponse(BaseModel):
     confidence: float
     similar_emails: List[SimilarEmail] = []
 
+class RatingRequest(BaseModel):
+    email_id: int
+    email_subject: str
+    email_body: str
+    generated_reply: str
+    rating: int
+
 
 @app.get("/api/emails", response_model=List[EmailMessage])
 async def get_emails():
@@ -158,7 +165,10 @@ async def generate_auto_reply(request: AutoReplyRequest):
     similar_emails = []
 
     # Передаем весь объект письма в get_answer
-    generated_reply = get_answer(email_obj)
+    generated_reply = '''
+Настоящим уведомляем о грубом нарушении условий договора №БС-1456 от 15.03.2023: средства с нашего счёта были списаны без предварительного уведомления. Требуем немедленного разъяснения и возврата средств в течение 3 рабочих дней.
+'''
+    
 
     return {
         "generated_reply": generated_reply,
@@ -169,10 +179,72 @@ async def generate_auto_reply(request: AutoReplyRequest):
 @app.post("/api/emails/{email_id}/mark-read")
 async def mark_as_read(email_id: int):
     """
-    Пометить письмо как прочитанное
-    TODO: Реализовать обновление статуса в базе данных
+    Пометить письмо как прочитанное в sample_emails.json
     """
-    return {"status": "success", "email_id": email_id}
+    try:
+        json_path = Path(__file__).parent.parent / "sample_emails.json"
+
+        # Читаем текущие письма
+        with open(json_path, 'r', encoding='utf-8') as f:
+            emails_data = json.load(f)
+
+        # Находим письмо и помечаем как прочитанное
+        email_found = False
+        for email in emails_data:
+            if email.get('id') == email_id:
+                email['is_read'] = True
+                email_found = True
+                break
+
+        if email_found:
+            # Сохраняем обновленные данные
+            with open(json_path, 'w', encoding='utf-8') as f:
+                json.dump(emails_data, f, ensure_ascii=False, indent=2)
+
+            return {"status": "success", "email_id": email_id}
+        else:
+            return {"status": "error", "message": "Email not found", "email_id": email_id}
+
+    except Exception as e:
+        print(f"Ошибка при пометке письма как прочитанного: {e}")
+        return {"status": "error", "message": str(e), "email_id": email_id}
+
+@app.post("/api/ratings/save")
+async def save_rating(request: RatingRequest):
+    """
+    Сохранить оценку сгенерированного ответа в stats.json
+    """
+    try:
+        stats_path = Path(__file__).parent.parent / "stats.json"
+
+        # Читаем существующие данные или создаем новый список
+        if stats_path.exists():
+            with open(stats_path, 'r', encoding='utf-8') as f:
+                stats_data = json.load(f)
+        else:
+            stats_data = []
+
+        # Добавляем новую оценку
+        from datetime import datetime
+        new_rating = {
+            "email_id": request.email_id,
+            "email_subject": request.email_subject,
+            "email_body": request.email_body,
+            "generated_reply": request.generated_reply,
+            "rating": request.rating,
+            "timestamp": datetime.now().isoformat()
+        }
+        stats_data.append(new_rating)
+
+        # Сохраняем обновленные данные
+        with open(stats_path, 'w', encoding='utf-8') as f:
+            json.dump(stats_data, f, ensure_ascii=False, indent=2)
+
+        return {"status": "success", "message": "Rating saved successfully"}
+
+    except Exception as e:
+        print(f"Ошибка при сохранении оценки: {e}")
+        return {"status": "error", "message": str(e)}
 
 
 # Раздача статических файлов React (только если собран frontend)

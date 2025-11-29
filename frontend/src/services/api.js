@@ -75,5 +75,40 @@ export const emailAPI = {
       console.error('Error generating auto reply:', error)
       throw error
     }
+  },
+
+  // Пометить письмо как прочитанное
+  async markAsRead(emailId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/emails/${emailId}/mark-read`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      if (!response.ok) throw new Error('Failed to mark email as read')
+      return await response.json()
+    } catch (error) {
+      console.error('Error marking email as read:', error)
+      throw error
+    }
+  },
+
+  // Сохранить оценку ответа
+  async saveRating(ratingData) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/ratings/save`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(ratingData),
+      })
+      if (!response.ok) throw new Error('Failed to save rating')
+      return await response.json()
+    } catch (error) {
+      console.error('Error saving rating:', error)
+      throw error
+    }
   }
 }
