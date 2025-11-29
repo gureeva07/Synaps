@@ -91,7 +91,7 @@ function App() {
         selectedEmail.body
       )
       console.log('Автоответ сгенерирован:', result)
-      return result.generated_reply
+      return result
     } catch (error) {
       console.error('Ошибка при генерации автоответа:', error)
     }

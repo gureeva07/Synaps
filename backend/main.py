@@ -50,9 +50,18 @@ class AutoReplyRequest(BaseModel):
     email_id: int
     original_message: str
 
+class SimilarEmail(BaseModel):
+    id: int
+    subject: str
+    preview: str
+    body: str
+    sender: str
+    timestamp: str
+
 class AutoReplyResponse(BaseModel):
     generated_reply: str
     confidence: float
+    similar_emails: List[SimilarEmail] = []
 
 
 @app.get("/api/emails", response_model=List[EmailMessage])
@@ -94,9 +103,38 @@ async def generate_auto_reply(request: AutoReplyRequest):
     """
     print(request)
 
+    # Заглушка для похожих писем - в реальном приложении здесь будет поиск в базе
+    similar_emails = [
+        {
+            "id": 101,
+            "subject": "Обновление дизайна интерфейса",
+            "preview": "Добрый день! Отправляю новые макеты для обзора...",
+            "body": "Добрый день! Отправляю новые макеты для обзора. Прошу посмотреть и дать фидбек.",
+            "sender": "Иван Петров",
+            "timestamp": "2 дня назад"
+        },
+        {
+            "id": 102,
+            "subject": "Финальная версия UI компонентов",
+            "preview": "Привет! Завершил работу над компонентами...",
+            "body": "Привет! Завершил работу над компонентами для новой версии приложения.",
+            "sender": "Мария Сидорова",
+            "timestamp": "Неделю назад"
+        },
+        {
+            "id": 103,
+            "subject": "Вопросы по дизайн-системе",
+            "preview": "Здравствуйте! Есть несколько вопросов по новой дизайн-системе...",
+            "body": "Здравствуйте! Есть несколько вопросов по новой дизайн-системе. Можем созвониться?",
+            "sender": "Алексей Новиков",
+            "timestamp": "Месяц назад"
+        }
+    ]
+
     return {
         "generated_reply": "Этот текст сгенерирует наш сервис",
-        "confidence": 1.0
+        "confidence": 1.0,
+        "similar_emails": similar_emails
     }
 
 @app.post("/api/emails/{email_id}/mark-read")

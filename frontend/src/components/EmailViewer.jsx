@@ -11,9 +11,13 @@ import {
   Send,
   Figma
 } from 'lucide-react'
+import SimilarEmailsScroll from './SimilarEmailsScroll'
 
 function EmailViewer({ email, onSendReply, onAutoReply }) {
   const [replyText, setReplyText] = useState('')
+  const [similarEmails, setSimilarEmails] = useState([])
+  const [originalEmail, setOriginalEmail] = useState(null)
+  const [currentViewEmail, setCurrentViewEmail] = useState(null)
 
   const handleSendReply = () => {
     if (replyText.trim()) {
@@ -23,10 +27,22 @@ function EmailViewer({ email, onSendReply, onAutoReply }) {
   }
 
   const handleAutoReply = async () => {
-    const generatedText = await onAutoReply()
-    if (generatedText) {
-      setReplyText(generatedText)
+    const result = await onAutoReply()
+    if (result) {
+      setReplyText(result.generated_reply)
+      if (result.similar_emails && result.similar_emails.length > 0) {
+        setSimilarEmails(result.similar_emails)
+        setOriginalEmail(email)
+      }
     }
+  }
+
+  const handleSelectSimilarEmail = (similarEmail) => {
+    setCurrentViewEmail(similarEmail)
+  }
+
+  const handleBackToOriginal = () => {
+    setCurrentViewEmail(null)
   }
 
   if (!email) {
@@ -38,6 +54,9 @@ function EmailViewer({ email, onSendReply, onAutoReply }) {
       </main>
     )
   }
+
+  // Используем похожее письмо если выбрано, иначе оригинальное
+  const displayEmail = currentViewEmail || email
 
   return (
     <main className="flex-1 flex flex-col h-full bg-white min-w-0 relative">
@@ -66,10 +85,10 @@ function EmailViewer({ email, onSendReply, onAutoReply }) {
           {/* Subject & Meta */}
           <div className="flex items-start justify-between mb-6">
             <h1 className="text-2xl text-gray-900 font-medium tracking-tight leading-tight">
-              {email.subject}
-              {email.tags && email.tags.length > 0 && (
+              {displayEmail.subject}
+              {displayEmail.tags && displayEmail.tags.length > 0 && (
                 <span className="ml-3 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
-                  {email.tags[0]}
+                  {displayEmail.tags[0]}
                 </span>
               )}
             </h1>
@@ -78,25 +97,27 @@ function EmailViewer({ email, onSendReply, onAutoReply }) {
           <div className="flex items-center justify-between mb-8 pb-8 border-b border-gray-300">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-semibold text-sm border-2 border-indigo-300">
-                {email.sender.split(' ').map(n => n[0]).join('').toUpperCase()}
+                {displayEmail.sender.split(' ').map(n => n[0]).join('').toUpperCase()}
               </div>
               <div>
                 <div className="flex items-baseline gap-2">
-                  <span className="font-medium text-sm text-gray-900">{email.sender}</span>
-                  <span className="text-xs text-gray-400">&lt;{email.senderEmail}&gt;</span>
+                  <span className="font-medium text-sm text-gray-900">{displayEmail.sender}</span>
+                  {displayEmail.senderEmail && (
+                    <span className="text-xs text-gray-400">&lt;{displayEmail.senderEmail}&gt;</span>
+                  )}
                 </div>
                 <div className="text-xs text-gray-500">Кому: мне</div>
               </div>
             </div>
             <div className="text-xs text-gray-400 font-medium">
-              Сегодня, {email.timestamp}
+              {displayEmail.timestamp}
             </div>
           </div>
 
           {/* Body Text */}
           <div className="prose prose-sm max-w-none text-gray-600 leading-7 font-normal">
             <p className="mb-4">Привет,</p>
-            <p className="mb-4">{email.body}</p>
+            <p className="mb-4">{displayEmail.body}</p>
 
             <p className="mb-4 font-medium text-gray-900">Основные изменения:</p>
             <ul className="list-disc pl-5 mb-6 space-y-1">
@@ -109,7 +130,7 @@ function EmailViewer({ email, onSendReply, onAutoReply }) {
               Прошу посмотреть прикрепленные макеты и дать фидбек до конца недели.
             </p>
 
-            {email.hasAttachment && (
+            {displayEmail.hasAttachment && (
               <div className="flex gap-4 mb-8">
                 <div className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors w-64">
                   <div className="bg-white p-2 rounded border border-gray-200 text-gray-500">
@@ -125,7 +146,7 @@ function EmailViewer({ email, onSendReply, onAutoReply }) {
               </div>
             )}
 
-            <p className="">С уважением, {email.sender.split(' ')[0]}</p>
+            <p className="">С уважением, {displayEmail.sender.split(' ')[0]}</p>
           </div>
         </div>
       </div>
@@ -133,6 +154,14 @@ function EmailViewer({ email, onSendReply, onAutoReply }) {
       {/* Reply Area */}
       <div className="border-t border-gray-300 bg-gray-50 p-6 pb-8 z-10 flex-shrink-0">
         <div className="max-w-3xl mx-auto">
+          {/* Similar Emails Scroll */}
+          <SimilarEmailsScroll
+            similarEmails={similarEmails}
+            onSelectEmail={handleSelectSimilarEmail}
+            onBackToOriginal={handleBackToOriginal}
+            showBackButton={currentViewEmail !== null}
+          />
+
           <div className="relative group rounded-xl border-2 border-gray-300 bg-white shadow-sm transition-all focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500">
             {/* Text Area */}
             <textarea
