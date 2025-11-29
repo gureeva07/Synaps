@@ -100,16 +100,11 @@ async def get_email(email_id: int):
         # Путь к файлу sample_emails.json
         json_path = Path(__file__).parent.parent / "sample_emails.json"
 
-        # Читаем JSON файл
         with open(json_path, 'r', encoding='utf-8') as f:
             emails_data = json.load(f)
-
-        # Ищем письмо по ID
         for email in emails_data:
             if email.get('id') == email_id:
                 return email
-
-        # Если письмо не найдено
         return {}
     except Exception as e:
         print(f"Ошибка при получении письма: {e}")
@@ -136,34 +131,35 @@ async def generate_auto_reply(request: AutoReplyRequest):
     """
     print(request)
 
-    # Заглушка для похожих писем - в реальном приложении здесь будет поиск в базе
-    similar_emails = [
-        {
-            "id": 101,
-            "subject": "Обновление дизайна интерфейса",
-            "preview": "Добрый день! Отправляю новые макеты для обзора...",
-            "body": "Добрый день! Отправляю новые макеты для обзора. Прошу посмотреть и дать фидбек.",
-            "sender": "Иван Петров",
-            "timestamp": "2 дня назад"
-        },
-        {
-            "id": 102,
-            "subject": "Финальная версия UI компонентов",
-            "preview": "Привет! Завершил работу над компонентами...",
-            "body": "Привет! Завершил работу над компонентами для новой версии приложения.",
-            "sender": "Мария Сидорова",
-            "timestamp": "Неделю назад"
-        },
-        {
-            "id": 103,
-            "subject": "Вопросы по дизайн-системе",
-            "preview": "Здравствуйте! Есть несколько вопросов по новой дизайн-системе...",
-            "body": "Здравствуйте! Есть несколько вопросов по новой дизайн-системе. Можем созвониться?",
-            "sender": "Алексей Новиков",
-            "timestamp": "Месяц назад"
+    # Получаем полный объект письма из JSON
+    try:
+        json_path = Path(__file__).parent.parent / "sample_emails.json"
+        with open(json_path, 'r', encoding='utf-8') as f:
+            emails_data = json.load(f)
+
+        # Находим письмо по ID
+        email_obj = None
+        for email in emails_data:
+            if email.get('id') == request.email_id:
+                email_obj = email
+                break
+
+    except Exception as e:
+        print(f"Ошибка при получении письма: {e}")
+        email_obj = {
+            "id": request.email_id,
+            "body": request.original_message,
+            "subject": "",
+            "sender": "",
+            "sender_email": ""
         }
-    ]
-    generated_reply = get_answer(request.original_message)
+
+    # Заглушка для похожих писем - в реальном приложении здесь будет поиск в базе
+    similar_emails = []
+
+    # Передаем весь объект письма в get_answer
+    generated_reply = get_answer(email_obj)
+
     return {
         "generated_reply": generated_reply,
         "confidence": 1.0,
