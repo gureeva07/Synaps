@@ -31,7 +31,7 @@ target_source_chunks = int(os.environ.get('TARGET_SOURCE_CHUNKS',4))
 
 from constants import CHROMA_SETTINGS
 
-def main():
+def get_answer(query):
     args = parse_arguments()
     embeddings = LocalAIEmbeddings(openai_api_base="http://localhost:8080", model="qwen3-embedding-4b")
     chroma_client = chromadb.PersistentClient(settings=CHROMA_SETTINGS , path=persist_directory)
@@ -47,7 +47,8 @@ def main():
     qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever, return_source_documents= not args.hide_source)
     # Запуск цепочки
     while True:
-        query = input("\nВведите запрос: ")
+        query = "Найди похожий текст: " + query
+        #query = "Кто обращался в банк по обновлению?"
         if query == "exit":
             break
         if query.strip() == "":
@@ -70,6 +71,9 @@ def main():
             print("\n> " + document.metadata["source"] + ":")
             print(document.page_content)
 
+        
+        return answer
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description='psb v1')
     parser.add_argument("--hide-source", "-S", action='store_true',
@@ -83,4 +87,4 @@ def parse_arguments():
 
 
 if __name__ == "__main__":
-    main()
+    get_answer('frgthyj')
