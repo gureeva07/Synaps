@@ -13,7 +13,7 @@ import argparse
 import time
 
 if not load_dotenv():
-    print("Could not load .env file or it is empty. Please check if it exists and is readable.")
+    print("Не удалось загрузить .env")
     exit(1)
 
 embeddings_model_name = os.environ.get("EMBEDDINGS_MODEL_NAME")
@@ -29,67 +29,58 @@ model_name = os.environ.get('MODEL_NAME', 'gemma-3-12b-it')
 model_n_batch = int(os.environ.get('MODEL_N_BATCH',8))
 target_source_chunks = int(os.environ.get('TARGET_SOURCE_CHUNKS',4))
 
-from constants import CHROMA_SETTINGS
+from config import CHROMA_SETTINGS
 
-def main():
-    # Parse the command line arguments
+def get_answer(query):
     args = parse_arguments()
     embeddings = LocalAIEmbeddings(openai_api_base="http://localhost:8080", model="qwen3-embedding-4b")
     chroma_client = chromadb.PersistentClient(settings=CHROMA_SETTINGS , path=persist_directory)
     db = Chroma(persist_directory=persist_directory, embedding_function=embeddings, client_settings=CHROMA_SETTINGS, client=chroma_client)
     retriever = db.as_retriever(search_kwargs={"k": target_source_chunks})
-    # activate/deactivate the streaming StdOut callback for LLMs
     callbacks = [] if args.mute_stream else [StreamingStdOutCallbackHandler()]
-    # Prepare the LLM
     match model_type:
-        case "LlamaCpp":
-            llm = LlamaCpp(model_path=model_path, max_tokens=model_n_ctx, n_batch=model_n_batch, callbacks=callbacks, verbose=False)
-        case "GPT4All":
-            llm = GPT4All(model=model_path, max_tokens=model_n_ctx, backend='gptj', n_batch=model_n_batch, callbacks=callbacks, verbose=False)
         case "OpenAI":
             llm = ChatOpenAI(temperature=0, openai_api_base=base_path, openai_api_key=key, model_name=model_name)
         case _default:
-            # raise exception if model_type is not supported
-            raise Exception(f"Model type {model_type} is not supported. Please choose one of the following: LlamaCpp, GPT4All")
+            raise Exception(f"Модель {model_type} не поддерживается")
 
     qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever, return_source_documents= not args.hide_source)
-    # Interactive questions and answers
+    # Запуск цепочки
     while True:
-        query = input("\nEnter a query: ")
+        query = "Найди похожее письмо: " + query + '\nИ сгенерируй для этого письма ответ в таком же стиле'
+        #query = "Кто обращался в банк по обновлению?"
         if query == "exit":
             break
         if query.strip() == "":
             continue
 
-        # Get the answer from the chain
+        # Получение ответа от цепочки
         start = time.time()
         res = qa(query)
         answer, docs = res['result'], [] if args.hide_source else res['source_documents']
         end = time.time()
 
-        # Print the result
-        print("\n\n> Question:")
+        # Выдача
+        print("\n\n> Запрос:")
         print(query)
-        print(f"\n> Answer (took {round(end - start, 2)} s.):")
+        print(f"\n> Ответ (занял {round(end - start, 2)} s.):")
         print(answer)
 
-        # Print the relevant sources used for the answer
+        # Указание источников
         for document in docs:
             print("\n> " + document.metadata["source"] + ":")
             print(document.page_content)
 
+        
+        return answer
+
 def parse_arguments():
-    parser = argparse.ArgumentParser(description='privateGPT: Ask questions to your documents without an internet connection, '
-                                                 'using the power of LLMs.')
+    parser = argparse.ArgumentParser(description='psb v1')
     parser.add_argument("--hide-source", "-S", action='store_true',
-                        help='Use this flag to disable printing of source documents used for answers.')
+                        help='Используйте данный флаг для скрытия источников')
 
     parser.add_argument("--mute-stream", "-M",
                         action='store_true',
-                        help='Use this flag to disable the streaming StdOut callback for LLMs.')
+                        help='Используйте данный флаг для отключения стриминга ответа')
 
     return parser.parse_args()
-
-
-if __name__ == "__main__":
-    main()

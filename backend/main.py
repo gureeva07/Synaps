@@ -5,6 +5,9 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List, Optional
 from pathlib import Path
+import json
+
+from query import *
 
 app = FastAPI(title="Email Client API")
 
@@ -67,20 +70,50 @@ class AutoReplyResponse(BaseModel):
 @app.get("/api/emails", response_model=List[EmailMessage])
 async def get_emails():
     """
-    Получить список всех писем
-    TODO: Реализовать получение писем из базы данных
+    Получить список всех писем из sample_emails.json
     """
-    # Заглушка - возвращаем пример данных
-    return []
+    try:
+        # Путь к файлу sample_emails.json
+        json_path = Path(__file__).parent.parent / "sample_emails.json"
+
+        # Читаем JSON файл
+        with open(json_path, 'r', encoding='utf-8') as f:
+            emails_data = json.load(f)
+
+        return emails_data
+    except FileNotFoundError:
+        print(f"Файл sample_emails.json не найден по пути: {json_path}")
+        return []
+    except json.JSONDecodeError as e:
+        print(f"Ошибка при чтении JSON: {e}")
+        return []
+    except Exception as e:
+        print(f"Неожиданная ошибка: {e}")
+        return []
 
 @app.get("/api/emails/{email_id}", response_model=EmailMessage)
 async def get_email(email_id: int):
     """
-    Получить конкретное письмо по ID
-    TODO: Реализовать получение письма из базы данных
+    Получить конкретное письмо по ID из sample_emails.json
     """
-    # Заглушка
-    return {}
+    try:
+        # Путь к файлу sample_emails.json
+        json_path = Path(__file__).parent.parent / "sample_emails.json"
+
+        # Читаем JSON файл
+        with open(json_path, 'r', encoding='utf-8') as f:
+            emails_data = json.load(f)
+
+        # Ищем письмо по ID
+        for email in emails_data:
+            if email.get('id') == email_id:
+                return email
+
+        # Если письмо не найдено
+        return {}
+    except Exception as e:
+        print(f"Ошибка при получении письма: {e}")
+        return {}
 
 @app.post("/api/emails/send")
 async def send_email(request: SendEmailRequest):
@@ -130,9 +163,9 @@ async def generate_auto_reply(request: AutoReplyRequest):
             "timestamp": "Месяц назад"
         }
     ]
-
+    generated_reply = get_answer(request.original_message)
     return {
-        "generated_reply": "Этот текст сгенерирует наш сервис",
+        "generated_reply": generated_reply,
         "confidence": 1.0,
         "similar_emails": similar_emails
     }

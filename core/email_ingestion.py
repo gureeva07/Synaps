@@ -31,7 +31,7 @@ if not load_dotenv():
     print("Не удалось загрузить .env")
     exit(1)
 
-from config import CHROMA_SETTINGS
+from backend.config import CHROMA_SETTINGS
 import chromadb
 
 # .env

@@ -1,5 +1,5 @@
 from langchain_core.prompts import PromptTemplate
-from config import OPENAI_API_KEY  # Import your API key from config
+from backend.config import OPENAI_API_KEY  # Import your API key from config
 from langchain_openai import ChatOpenAI
 from utils.logger import get_logger
 

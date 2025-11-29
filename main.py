@@ -4,7 +4,7 @@ from core.email_imap import fetch_imap_emails
 from core.email_ingestion import fetch_email
 from core.email_sender import send_email,send_draft_to_gmail,extract_name_from_email
 from utils.logger import get_logger
-from config import IMAP_USERNAME, IMAP_PASSWORD, IMAP_SERVER
+from backend.config import IMAP_USERNAME, IMAP_PASSWORD, IMAP_SERVER
 from core.supervisor import supervisor_langgraph 
 
 

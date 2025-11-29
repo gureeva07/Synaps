@@ -116,32 +116,10 @@ function EmailViewer({ email, onSendReply, onAutoReply }) {
 
           {/* Body Text */}
           <div className="prose prose-sm max-w-none text-gray-600 leading-7 font-normal">
-            <p className="mb-4">Привет,</p>
             <p className="mb-4">{displayEmail.body}</p>
-
-            <p className="mb-4 font-medium text-gray-900">Основные изменения:</p>
-            <ul className="list-disc pl-5 mb-6 space-y-1">
-              <li>Полностью переработанная цветовая палитра для темной темы.</li>
-              <li>Новые компоненты для графиков с использованием SVG.</li>
-              <li>Улучшенная поддержка клавиатурной навигации.</li>
-            </ul>
-
-            <p className="mb-6">
-              Прошу посмотреть прикрепленные макеты и дать фидбек до конца недели.
-            </p>
-
             {displayEmail.hasAttachment && (
               <div className="flex gap-4 mb-8">
                 <div className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors w-64">
-                  <div className="bg-white p-2 rounded border border-gray-200 text-gray-500">
-                    <Figma className="w-5 h-5" />
-                  </div>
-                  <div className="flex flex-col overflow-hidden">
-                    <span className="text-xs font-medium text-gray-900 truncate">
-                      Design_System_v2.fig
-                    </span>
-                    <span className="text-xs text-gray-400">12.4 MB</span>
-                  </div>
                 </div>
               </div>
             )}

@@ -1,6 +1,6 @@
 import smtplib
 from email.mime.text import MIMEText
-from config import EMAIL_SERVER, EMAIL_PASSWORD, EMAIL_USERNAME, EMAIL_PORT
+from backend.config import EMAIL_SERVER, EMAIL_PASSWORD, EMAIL_USERNAME, EMAIL_PORT
 from email.message import EmailMessage
 from utils.logger import get_logger
 from utils.formatter import clean_text,format_email
