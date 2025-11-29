@@ -31,23 +31,25 @@ target_source_chunks = int(os.environ.get('TARGET_SOURCE_CHUNKS',4))
 
 from config import CHROMA_SETTINGS
 
-def get_answer(query):
-    args = parse_arguments()
+def get_answer(email_obj):
+    #print(email_obj)
+    #args = parse_arguments()
     embeddings = LocalAIEmbeddings(openai_api_base="http://localhost:8080", model="qwen3-embedding-4b")
     chroma_client = chromadb.PersistentClient(settings=CHROMA_SETTINGS , path=persist_directory)
     db = Chroma(persist_directory=persist_directory, embedding_function=embeddings, client_settings=CHROMA_SETTINGS, client=chroma_client)
     retriever = db.as_retriever(search_kwargs={"k": target_source_chunks})
-    callbacks = [] if args.mute_stream else [StreamingStdOutCallbackHandler()]
+    #callbacks = [] if args.mute_stream else [StreamingStdOutCallbackHandler()]
     match model_type:
         case "OpenAI":
             llm = ChatOpenAI(temperature=0, openai_api_base=base_path, openai_api_key=key, model_name=model_name)
         case _default:
             raise Exception(f"Модель {model_type} не поддерживается")
 
-    qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever, return_source_documents= not args.hide_source)
+    qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever, return_source_documents=True)
     # Запуск цепочки
     while True:
-        query = "Найди похожее письмо: " + query + '\nИ сгенерируй для этого письма ответ в таком же стиле'
+        query = "Составь ответное письмо на данный запрос от"  + email_obj["sender"] + ":" + email_obj["body"] + "\nОтвет должен быть в формальном стиле и от Василия Пупкина, сотрудника ПСБ"
+        print(query)
         #query = "Кто обращался в банк по обновлению?"
         if query == "exit":
             break
@@ -57,7 +59,7 @@ def get_answer(query):
         # Получение ответа от цепочки
         start = time.time()
         res = qa(query)
-        answer, docs = res['result'], [] if args.hide_source else res['source_documents']
+        answer, docs = res['result'], res['source_documents']
         end = time.time()
 
         # Выдача
